@@ -18,7 +18,7 @@ from openai import OpenAI
 load_dotenv()
 
 # --- Configuración ---
-PROMPT = "Explícame en 2 frases qué es un webhook, como si se lo explicaras a alguien de logística."
+PROMPT = "Extrae en formato lista estos datos de esta factura: número de factura, fecha, importe total y nombre del cliente. Factura: [FACTURA 221/26 EDIALBA SUBCONTRATA]"
 
 # --- Llamada a Claude (Anthropic) ---
 def preguntar_a_claude(prompt: str) -> str:
