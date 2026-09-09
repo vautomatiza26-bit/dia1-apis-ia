@@ -1,0 +1,5 @@
+﻿archivo_origen;numero_factura;fecha;importe_total;nombre_cliente
+factura1.txt;221/26;15/09/2026;3450.0;Constructora Ejemplo S.A.
+factura2.txt;045/26;03/09/2026;1280.5;Distribuciones Rioja S.L.
+factura3.txt;0089/2026;22/08/2026;2975.2;Almacenes del Turia S.L.
+factura4.txt;F-2026-0312;01/09/2026;610.0;Óptica Visión Clara S.L.
