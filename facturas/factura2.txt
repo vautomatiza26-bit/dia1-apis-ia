@@ -1,0 +1,6 @@
+FACTURA 045/26
+TRANSPORTES LEVANTE S.L.
+Fecha: 03/09/2026
+Cliente: Distribuciones Rioja S.L.
+Concepto: Transporte de mercancía - Ruta Valencia-Bilbao
+Importe total: 1.280,50 EUR

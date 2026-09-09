@@ -1,0 +1,6 @@
+FACTURA 0089/2026
+LOGÍSTICA MEDITERRÁNEO S.A.
+Fecha: 22/08/2026
+Cliente: Almacenes del Turia S.L.
+Concepto: Gestión de almacenaje y picking - Agosto 2026
+Importe total: 2.975,20 EUR

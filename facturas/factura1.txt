@@ -1,0 +1,6 @@
+FACTURA 221/26
+EDIALBA SUBCONTRATA S.L.
+Fecha: 15/09/2026
+Cliente: Constructora Ejemplo S.A.
+Concepto: Servicios de subcontrata - Septiembre 2026
+Importe total: 3.450,00 EUR
