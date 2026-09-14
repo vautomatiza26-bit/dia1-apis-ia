@@ -4,6 +4,8 @@ Proyectos prácticos de automatización con LLMs (Claude y GPT), construidos com
 
 Vengo del mundo de la automatización con **n8n** (proyecto profesional [JAPIOS IA](https://github.com/vautomatiza26-bit)) y este repositorio documenta el paso a construir estas soluciones también a nivel de código, entendiendo qué ocurre "por debajo" de las herramientas no-code.
 
+🚀 **API en vivo:** [asistente-facturas-api.onrender.com/docs](https://asistente-facturas-api.onrender.com/docs) — pruébala directamente, sin instalar nada (el plan gratuito puede tardar hasta 1 minuto en "despertar" si lleva un rato inactiva).
+
 ## Contenido
 
 ### `dia1_comparar_modelos.py`
@@ -24,18 +26,30 @@ Sistema de **RAG (Retrieval-Augmented Generation)**: indexa las facturas calcula
 ### `asistente_facturas.py`
 Versión interactiva por terminal del agente anterior, con **memoria conversacional**: mantiene el historial de la conversación para responder preguntas de seguimiento sin repetir contexto, y evita llamadas innecesarias a herramientas cuando ya tiene la información.
 
+### `semana3_crear_base_datos.py`
+Migra los datos de facturas de CSV a una base de datos **SQLite**, con esquema tipado y control de duplicados.
+
+### `semana3_agente_sql.py`
+Agente **text-to-SQL**: el modelo escribe sus propias consultas SQL según la pregunta en lenguaje natural, en vez de depender de funciones fijas por tipo de pregunta. Incluye una capa de seguridad que bloquea cualquier consulta que no sea de solo lectura (`SELECT`).
+
+### `api.py`
+La misma lógica del agente SQL expuesta como **API web con FastAPI**, con documentación interactiva automática (`/docs`) y desplegada públicamente en Render.
+
 ## Stack
 
 - Python
 - Anthropic API (Claude) / OpenAI API (GPT), incluyendo su API de embeddings
 - Tool/function calling para salidas estructuradas y para agentes multi-herramienta
 - RAG (embeddings + similitud coseno con NumPy)
+- SQL (SQLite) y patrón text-to-SQL, con validación de seguridad en las consultas generadas por IA
+- FastAPI + despliegue en Render
 - Manejo de variables de entorno (`python-dotenv`) para no exponer claves
 
 ## Por qué este enfoque
 
-Cada script está pensado como un paso incremental: de "hablar con una IA" a "extraer datos estructurados" a "procesar documentos en lote de forma fiable" a "un agente que decide por sí mismo qué herramienta usar". Es el mismo patrón que uso en producción con n8n en JAPIOS IA, pero aquí construido desde el código para entender y controlar cada parte del proceso.
+Cada script está pensado como un paso incremental: de "hablar con una IA" a "extraer datos estructurados" a "procesar documentos en lote de forma fiable" a "un agente que decide por sí mismo qué herramienta usar" a "ese agente expuesto como servicio real, accesible por cualquiera". Es el mismo patrón que uso en producción con n8n en JAPIOS IA, pero aquí construido desde el código para entender y controlar cada parte del proceso.
 
 ---
 
-*Este repositorio se irá ampliando con nuevos proyectos: integraciones más avanzadas, despliegue y bases de datos.*
+*Este repositorio se irá ampliando con nuevos proyectos e integraciones más avanzadas.*
+
