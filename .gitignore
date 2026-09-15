@@ -3,3 +3,4 @@ credentials.json
 token.json
 __pycache__/
 gmail_procesados.csv
+base_vectorial/
