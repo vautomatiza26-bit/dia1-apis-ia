@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asistente de Facturas — JAPIOS IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fondo: #0F1A24;
+    --panel: #16232F;
+    --panel-borde: #263344;
+    --acento: #C9A227;
+    --acento-suave: #C9A22733;
+    --texto: #E8E6DF;
+    --texto-tenue: #8B96A3;
+    --error: #D97757;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--fondo);
+    color: var(--texto);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 680px;
+    display: flex;
+    flex-direction: column;
+    height: 88vh;
+    max-height: 780px;
+  }
+
+  header {
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--panel-borde);
+    margin-bottom: 0;
+  }
+
+  header .eyebrow {
+    color: var(--acento);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+
+  header h1 {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    font-size: 28px;
+    margin: 4px 0 6px;
+    color: var(--texto);
+  }
+
+  header p {
+    color: var(--texto-tenue);
+    font-size: 13px;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  header p a { color: var(--acento); text-decoration: none; }
+  header p a:hover { text-decoration: underline; }
+
+  .panel {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--panel-borde);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .mensajes {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .mensajes::-webkit-scrollbar { width: 8px; }
+  .mensajes::-webkit-scrollbar-thumb { background: var(--panel-borde); border-radius: 4px; }
+
+  .msg-usuario {
+    font-size: 14px;
+    color: var(--texto);
+  }
+  .msg-usuario .prompt {
+    color: var(--acento);
+    margin-right: 8px;
+  }
+
+  .msg-asistente {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--texto);
+    border-left: 2px solid var(--acento);
+    padding-left: 14px;
+    white-space: pre-wrap;
+  }
+
+  .msg-asistente.cargando {
+    color: var(--texto-tenue);
+    font-style: italic;
+  }
+
+  .msg-error {
+    font-size: 13px;
+    color: var(--error);
+    border-left: 2px solid var(--error);
+    padding-left: 14px;
+  }
+
+  .vacio {
+    color: var(--texto-tenue);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .vacio .ej { color: var(--texto); }
+
+  form {
+    display: flex;
+    border-top: 1px solid var(--panel-borde);
+    padding: 14px 16px;
+    gap: 10px;
+  }
+
+  input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--texto);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+  }
+  input::placeholder { color: var(--texto-tenue); }
+
+  button {
+    background: var(--acento);
+    border: none;
+    color: #1A1405;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  button:disabled { opacity: 0.5; cursor: default; }
+  button:hover:not(:disabled) { filter: brightness(1.08); }
+
+  footer {
+    text-align: center;
+    color: var(--texto-tenue);
+    font-size: 11px;
+    margin-top: 14px;
+  }
+  footer a { color: var(--texto-tenue); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <div class="eyebrow">JAPIOS IA — portfolio técnico</div>
+    <h1>Asistente de facturas</h1>
+    <p>Agente con acceso a búsqueda semántica y base de datos SQL, que decide por sí mismo qué herramienta usar. Código en <a href="https://github.com/vautomatiza26-bit/dia1-apis-ia" target="_blank">GitHub</a>.</p>
+  </header>
+
+  <div class="panel">
+    <div class="mensajes" id="mensajes">
+      <div class="vacio">
+        Prueba, por ejemplo:<br>
+        <span class="ej">❯ ¿qué factura tiene el importe más alto?</span><br>
+        <span class="ej">❯ ¿hay alguna factura relacionada con transporte?</span><br><br>
+        (el servicio gratuito puede tardar hasta 1 minuto en "despertar" si lleva un rato inactivo)
+      </div>
+    </div>
+    <form id="formulario">
+      <input type="text" id="entrada" placeholder="Escribe tu pregunta..." autocomplete="off" autofocus>
+      <button type="submit" id="boton">Preguntar</button>
+    </form>
+  </div>
+
+  <footer>Víctor Herreros Arenas · API en <a href="https://asistente-facturas-api.onrender.com/docs" target="_blank">FastAPI + Render</a></footer>
+</div>
+
+<script>
+  const URL_API = "https://asistente-facturas-api.onrender.com/preguntar";
+
+  const formulario = document.getElementById("formulario");
+  const entrada = document.getElementById("entrada");
+  const boton = document.getElementById("boton");
+  const mensajes = document.getElementById("mensajes");
+
+  function agregarMensajeUsuario(texto) {
+    const div = document.createElement("div");
+    div.className = "msg-usuario";
+    div.innerHTML = `<span class="prompt">❯</span>${escaparHTML(texto)}`;
+    mensajes.appendChild(div);
+  }
+
+  function agregarMensajeAsistente(texto, cargando = false) {
+    const div = document.createElement("div");
+    div.className = cargando ? "msg-asistente cargando" : "msg-asistente";
+    div.textContent = texto;
+    mensajes.appendChild(div);
+    return div;
+  }
+
+  function agregarError(texto) {
+    const div = document.createElement("div");
+    div.className = "msg-error";
+    div.textContent = texto;
+    mensajes.appendChild(div);
+  }
+
+  function escaparHTML(texto) {
+    const d = document.createElement("div");
+    d.textContent = texto;
+    return d.innerHTML;
+  }
+
+  function desplazarAbajo() {
+    mensajes.scrollTop = mensajes.scrollHeight;
+  }
+
+  formulario.addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    const pregunta = entrada.value.trim();
+    if (!pregunta) return;
+
+    const primeraVez = mensajes.querySelector(".vacio");
+    if (primeraVez) primeraVez.remove();
+
+    agregarMensajeUsuario(pregunta);
+    entrada.value = "";
+    entrada.disabled = true;
+    boton.disabled = true;
+    desplazarAbajo();
+
+    const marcadorCargando = agregarMensajeAsistente("pensando (puede tardar si el servicio estaba dormido)...", true);
+    desplazarAbajo();
+
+    try {
+      const respuesta = await fetch(URL_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pregunta }),
+      });
+
+      if (!respuesta.ok) throw new Error(`Error del servidor (${respuesta.status})`);
+
+      const datos = await respuesta.json();
+      marcadorCargando.remove();
+      agregarMensajeAsistente(datos.respuesta);
+    } catch (error) {
+      marcadorCargando.remove();
+      agregarError(`No se pudo obtener respuesta: ${error.message}`);
+    } finally {
+      entrada.disabled = false;
+      boton.disabled = false;
+      entrada.focus();
+      desplazarAbajo();
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -19,6 +19,7 @@ import os
 import sqlite3
 from dotenv import load_dotenv
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 import anthropic
 
@@ -98,8 +99,14 @@ class PreguntaEntrada(BaseModel):
 
 
 @app.get("/")
-def raiz():
-    """Endpoint de comprobación: confirma que la API está viva."""
+def interfaz_chat():
+    """Sirve la interfaz de chat web en la raíz del sitio."""
+    return FileResponse("index.html")
+
+
+@app.get("/health")
+def salud():
+    """Endpoint de comprobación técnica: confirma que la API está viva."""
     return {"estado": "ok", "mensaje": "API del asistente de facturas funcionando"}
 
 
