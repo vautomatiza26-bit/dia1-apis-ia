@@ -1,0 +1,36 @@
+﻿archivo;categoria;prioridad;resumen;requiere_respuesta;respuesta_sugerida
+email1.txt;consulta_cliente;alta;La cliente María González solicita confirmación del plazo de entrega del pedido 4521, ya que necesita el material antes del próximo lunes para el inicio de una obra.;True;"Estimada María,
+
+Gracias por ponerse en contacto con nosotros. Hemos recibido su consulta sobre el pedido número 4521 y entendemos la urgencia de su situación.
+
+Estamos verificando el estado de su pedido y nos pondremos en contacto con usted a la mayor brevedad posible para confirmarle el plazo de entrega exacto y asegurarnos de que el material llegue a tiempo para el inicio de su obra el próximo lunes.
+
+Disculpe las molestias y quede tranquila, ya que le garantizamos una respuesta lo antes posible.
+
+Un cordial saludo,
+[Nombre] - Departamento de Atención al Cliente"
+email2.txt;incidencia;alta;El cliente Javier Rodríguez (Almacenes del Turia S.L.) reporta un doble cobro de la factura 0089/2026, lo que le está generando problemas de tesorería y exige resolución urgente.;True;"Estimado Javier,
+
+Gracias por contactarnos y lamentamos los inconvenientes ocasionados. Hemos recibido su mensaje y lo estamos tratando con carácter urgente.
+
+Nuestro departamento de facturación ya ha sido notificado del posible doble cargo en la factura 0089/2026 y procederemos a verificarlo de inmediato con las capturas que nos ha adjuntado.
+
+En cuanto confirmemos el error, iniciaremos el proceso de devolución del importe duplicado a la mayor brevedad posible. Le mantendremos informado durante el día sobre el estado de la gestión.
+
+Disculpe las molestias y quede tranquilo, nos aseguraremos de resolver esta incidencia con la mayor celeridad.
+
+Un saludo cordial,
+[Nombre y firma del agente]"
+email4.txt;solicitud_presupuesto;media;La empresa Óptica Visión Clara S.L. solicita un presupuesto detallado para externalizar la gestión de nóminas de sus 8 empleados con una periodicidad trimestral.;True;"Estimada Laura,
+
+Muchas gracias por ponerse en contacto con nosotros y por considerar nuestros servicios para la gestión de nóminas de Óptica Visión Clara S.L.
+
+Con mucho gusto elaboraremos un presupuesto personalizado adaptado a sus necesidades. Para poder ofrecerle una propuesta lo más ajustada posible, nos sería de gran utilidad conocer algunos detalles adicionales, como el tipo de contratos de sus empleados o si existen particularidades en los convenios aplicables.
+
+En breve nos pondremos en contacto con usted para presentarle nuestra propuesta detallada, que incluirá el desglose de servicios y las tarifas correspondientes.
+
+Quedamos a su disposición para cualquier consulta.
+
+Atentamente,
+[Nombre] | [Empresa]"
+email3.txt;spam;baja;Email promocional no solicitado que anuncia un descuento del 70% con lenguaje alarmista y urgencia artificial, característico de spam.;False;
