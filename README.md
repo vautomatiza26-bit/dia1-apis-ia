@@ -2,7 +2,7 @@
 
 Proyectos prácticos de automatización con LLMs (Claude y GPT), construidos como parte de mi proceso de especialización en IA generativa y automatización.
 
-Vengo del mundo de la automatización con **n8n** (proyecto profesional [JAPIOS IA](https://github.com/vautomatiza26-bit)) y este repositorio documenta el paso a construir estas soluciones también a nivel de código, entendiendo qué ocurre "por debajo" de las herramientas no-code.
+Vengo del mundo de la automatización con **n8n** (proyecto propio de especialización [JAPIOS IA](https://github.com/vautomatiza26-bit)) y este repositorio documenta el paso a construir estas soluciones también a nivel de código, entendiendo qué ocurre "por debajo" de las herramientas no-code.
 
 🚀 **API en vivo:** [asistente-facturas-api.onrender.com/docs](https://asistente-facturas-api.onrender.com/docs) — pruébala directamente, sin instalar nada (el plan gratuito puede tardar hasta 1 minuto en "despertar" si lleva un rato inactiva).
 
@@ -35,6 +35,9 @@ Agente **text-to-SQL**: el modelo escribe sus propias consultas SQL según la pr
 ### `api.py`
 La misma lógica del agente SQL expuesta como **API web con FastAPI**, con documentación interactiva automática (`/docs`) y desplegada públicamente en Render.
 
+### `agente_bandeja_email.py`
+Aplicación del mismo patrón de extracción estructurada a un **dominio distinto**: clasifica emails por categoría y prioridad (usando `enum` para restringir valores válidos), genera un resumen y sugiere una respuesta — dejando el campo de respuesta vacío cuando no es necesaria (ej. spam). Demuestra que la arquitectura se transfiere entre dominios, no es un caso memorizado.
+
 ## Stack
 
 - Python
@@ -47,7 +50,7 @@ La misma lógica del agente SQL expuesta como **API web con FastAPI**, con docum
 
 ## Por qué este enfoque
 
-Cada script está pensado como un paso incremental: de "hablar con una IA" a "extraer datos estructurados" a "procesar documentos en lote de forma fiable" a "un agente que decide por sí mismo qué herramienta usar" a "ese agente expuesto como servicio real, accesible por cualquiera". Es el mismo patrón que uso en producción con n8n en JAPIOS IA, pero aquí construido desde el código para entender y controlar cada parte del proceso.
+Cada script está pensado como un paso incremental: de "hablar con una IA" a "extraer datos estructurados" a "procesar documentos en lote de forma fiable" a "un agente que decide por sí mismo qué herramienta usar" a "ese agente expuesto como servicio real, accesible por cualquiera" — y finalmente, aplicar el mismo patrón a un dominio distinto para confirmar que generaliza. Es el mismo enfoque que aplico en mi proyecto propio de automatización con n8n (JAPIOS IA), pero aquí construido desde el código para entender y controlar cada parte del proceso.
 
 ---
 
