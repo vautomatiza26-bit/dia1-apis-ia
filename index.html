@@ -200,7 +200,10 @@
 </div>
 
 <script>
-  const URL_API = "https://asistente-facturas-api.onrender.com/preguntar";
+  // Ruta relativa: la página siempre llama a "su propio" servidor,
+  // sea localhost, un contenedor Docker, o la URL de producción en Render.
+  // Esto evita problemas de CORS entre dominios distintos.
+  const URL_API = "/preguntar";
 
   const formulario = document.getElementById("formulario");
   const entrada = document.getElementById("entrada");
