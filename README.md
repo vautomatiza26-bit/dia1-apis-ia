@@ -4,7 +4,7 @@ Proyectos prácticos de automatización con LLMs (Claude y GPT), construidos com
 
 Vengo del mundo de la automatización con **n8n** (proyecto propio de especialización [JAPIOS IA](https://github.com/vautomatiza26-bit)) y este repositorio documenta el paso a construir estas soluciones también a nivel de código, entendiendo qué ocurre "por debajo" de las herramientas no-code.
 
-🚀 **API en vivo:** [asistente-facturas-api.onrender.com/docs](https://asistente-facturas-api.onrender.com/docs) — pruébala directamente, sin instalar nada (el plan gratuito puede tardar hasta 1 minuto en "despertar" si lleva un rato inactiva).
+🚀 **Demo en vivo:** [asistente-facturas-api.onrender.com](https://asistente-facturas-api.onrender.com) — chatea directamente con el agente, sin instalar nada (el plan gratuito puede tardar hasta 1 minuto en "despertar" si lleva un rato inactiva). Documentación técnica de la API en [/docs](https://asistente-facturas-api.onrender.com/docs).
 
 ## Contenido
 
@@ -32,25 +32,39 @@ Migra los datos de facturas de CSV a una base de datos **SQLite**, con esquema t
 ### `semana3_agente_sql.py`
 Agente **text-to-SQL**: el modelo escribe sus propias consultas SQL según la pregunta en lenguaje natural, en vez de depender de funciones fijas por tipo de pregunta. Incluye una capa de seguridad que bloquea cualquier consulta que no sea de solo lectura (`SELECT`).
 
-### `api.py`
-La misma lógica del agente SQL expuesta como **API web con FastAPI**, con documentación interactiva automática (`/docs`) y desplegada públicamente en Render.
+### `api.py` + `index.html`
+La lógica del agente expuesta como **API web con FastAPI**, con documentación interactiva automática (`/docs`) y una **interfaz de chat propia** servida en la raíz, desplegadas públicamente en Render.
 
 ### `agente_bandeja_email.py`
 Aplicación del mismo patrón de extracción estructurada a un **dominio distinto**: clasifica emails por categoría y prioridad (usando `enum` para restringir valores válidos), genera un resumen y sugiere una respuesta — dejando el campo de respuesta vacío cuando no es necesaria (ej. spam). Demuestra que la arquitectura se transfiere entre dominios, no es un caso memorizado.
+
+### `conectar_gmail.py`
+Integración con **Gmail real vía OAuth**: autenticación con el flujo estándar de "Authorization Code" (incluye renovación automática de token), lectura y parseo de mensajes MIME reales, y aplicación del agente de clasificación sobre la bandeja de entrada de verdad.
+
+### `vectorial_chromadb.py`
+Sustituye la búsqueda semántica manual (NumPy) por una **base de datos vectorial persistente (ChromaDB)**: los embeddings se calculan una sola vez y se reutilizan entre ejecuciones, en vez de recalcularse cada vez.
+
+### `eval_extraccion_facturas.py`
+Sistema de **evaluación (eval)** con casos de prueba y respuesta correcta conocida (*ground truth*), incluyendo un caso diseñado para detectar si el modelo "alucina" datos que no están en el texto. Mide precisión de forma automática y reproducible, en vez de comprobar manualmente caso a caso.
+
+### `streaming_demo.py`
+Comparación entre llamadas bloqueantes y **streaming** de respuestas, midiendo el "time to first token" real frente al tiempo total.
 
 ## Stack
 
 - Python
 - Anthropic API (Claude) / OpenAI API (GPT), incluyendo su API de embeddings
 - Tool/function calling para salidas estructuradas y para agentes multi-herramienta
-- RAG (embeddings + similitud coseno con NumPy)
+- RAG con embeddings, tanto manual (NumPy) como con base de datos vectorial (ChromaDB)
 - SQL (SQLite) y patrón text-to-SQL, con validación de seguridad en las consultas generadas por IA
-- FastAPI + despliegue en Render
+- OAuth 2.0 (integración real con la API de Gmail)
+- FastAPI + despliegue en Render, con interfaz de chat web propia
+- Evaluación sistemática de resultados de IA (evals) y streaming de respuestas
 - Manejo de variables de entorno (`python-dotenv`) para no exponer claves
 
 ## Por qué este enfoque
 
-Cada script está pensado como un paso incremental: de "hablar con una IA" a "extraer datos estructurados" a "procesar documentos en lote de forma fiable" a "un agente que decide por sí mismo qué herramienta usar" a "ese agente expuesto como servicio real, accesible por cualquiera" — y finalmente, aplicar el mismo patrón a un dominio distinto para confirmar que generaliza. Es el mismo enfoque que aplico en mi proyecto propio de automatización con n8n (JAPIOS IA), pero aquí construido desde el código para entender y controlar cada parte del proceso.
+Cada script está pensado como un paso incremental: de "hablar con una IA" a "extraer datos estructurados" a "procesar documentos en lote de forma fiable" a "un agente que decide por sí mismo qué herramienta usar" a "ese agente expuesto como servicio real, con interfaz propia y accesible por cualquiera" — pasando por generalizar el patrón a un dominio distinto, conectar con un proveedor externo real (Gmail) y medir la calidad del sistema de forma sistemática. Es el mismo enfoque que aplico en mi proyecto propio de automatización con n8n (JAPIOS IA), pero aquí construido desde el código para entender y controlar cada parte del proceso.
 
 ---
 
