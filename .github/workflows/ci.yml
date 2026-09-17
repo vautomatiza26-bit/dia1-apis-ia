@@ -1,0 +1,48 @@
+# .github/workflows/ci.yml
+#
+# CI (Integración Continua) - se ejecuta AUTOMÁTICAMENTE en cada push
+# o pull request. Solo hace comprobaciones GRATUITAS: no llama a
+# ninguna API de pago (Claude, OpenAI), así que puedes tenerlo
+# corriendo en cada cambio sin preocuparte por el coste.
+#
+# Qué comprueba:
+# - Que el código Python no tiene errores de sintaxis
+# - Que todas las dependencias listadas en requirements.txt se instalan sin conflictos
+# - Que no hay archivos de credenciales colados por error en el commit
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  comprobaciones-basicas:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el código del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Comprobar sintaxis de todos los scripts Python
+        run: |
+          python -m py_compile *.py
+
+      - name: Verificar que no se ha colado ningún archivo de credenciales
+        run: |
+          if [ -f "credentials.json" ] || [ -f "token.json" ] || [ -f ".env" ]; then
+            echo "❌ ERROR: hay un archivo de credenciales en el repositorio. Revisa el .gitignore."
+            exit 1
+          else
+            echo "✅ No se han encontrado archivos de credenciales sueltos."
+          fi
