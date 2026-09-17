@@ -1,5 +1,7 @@
 # Camino hacia AI Engineer
 
+![CI](https://github.com/vautomatiza26-bit/dia1-apis-ia/actions/workflows/ci.yml/badge.svg)
+
 Proyectos prácticos de automatización con LLMs (Claude y GPT), construidos como parte de mi proceso de especialización en IA generativa y automatización.
 
 Vengo del mundo de la automatización con **n8n** (proyecto propio de especialización [JAPIOS IA](https://github.com/vautomatiza26-bit)) y este repositorio documenta el paso a construir estas soluciones también a nivel de código, entendiendo qué ocurre "por debajo" de las herramientas no-code.
@@ -50,6 +52,12 @@ Sistema de **evaluación (eval)** con casos de prueba y respuesta correcta conoc
 ### `streaming_demo.py`
 Comparación entre llamadas bloqueantes y **streaming** de respuestas, midiendo el "time to first token" real frente al tiempo total.
 
+### `Dockerfile` + `.dockerignore`
+**Containerización** de la API: define el entorno exacto (versión de Python, dependencias) en el que corre la aplicación, de forma que el mismo contenedor funciona igual en local, en Render o en cualquier otro proveedor cloud.
+
+### `.github/workflows/`
+**CI/CD con GitHub Actions**: comprobaciones automáticas gratuitas en cada `push` (sintaxis, ausencia de credenciales filtradas), separadas de un workflow manual de evaluación que sí consume la API de pago — una decisión deliberada de coste, no accidental.
+
 ## Stack
 
 - Python
@@ -60,11 +68,12 @@ Comparación entre llamadas bloqueantes y **streaming** de respuestas, midiendo 
 - OAuth 2.0 (integración real con la API de Gmail)
 - FastAPI + despliegue en Render, con interfaz de chat web propia
 - Evaluación sistemática de resultados de IA (evals) y streaming de respuestas
+- Docker (containerización) y CI/CD con GitHub Actions
 - Manejo de variables de entorno (`python-dotenv`) para no exponer claves
 
 ## Por qué este enfoque
 
-Cada script está pensado como un paso incremental: de "hablar con una IA" a "extraer datos estructurados" a "procesar documentos en lote de forma fiable" a "un agente que decide por sí mismo qué herramienta usar" a "ese agente expuesto como servicio real, con interfaz propia y accesible por cualquiera" — pasando por generalizar el patrón a un dominio distinto, conectar con un proveedor externo real (Gmail) y medir la calidad del sistema de forma sistemática. Es el mismo enfoque que aplico en mi proyecto propio de automatización con n8n (JAPIOS IA), pero aquí construido desde el código para entender y controlar cada parte del proceso.
+Cada script está pensado como un paso incremental: de "hablar con una IA" a "extraer datos estructurados" a "procesar documentos en lote de forma fiable" a "un agente que decide por sí mismo qué herramienta usar" a "ese agente expuesto como servicio real, con interfaz propia y accesible por cualquiera" — pasando por generalizar el patrón a un dominio distinto, conectar con un proveedor externo real (Gmail), medir la calidad del sistema de forma sistemática, y automatizar su propia validación en cada cambio. Es el mismo enfoque que aplico en mi proyecto propio de automatización con n8n (JAPIOS IA), pero aquí construido desde el código para entender y controlar cada parte del proceso.
 
 ---
 
