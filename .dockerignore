@@ -1,0 +1,11 @@
+# No incluir en la imagen Docker (igual de importante que .gitignore,
+# pero para lo que entra en el contenedor en vez de en Git)
+__pycache__/
+*.pyc
+.env
+credentials.json
+token.json
+base_vectorial/
+.git/
+.gitignore
+venv/
