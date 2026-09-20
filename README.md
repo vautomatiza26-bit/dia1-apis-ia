@@ -3,6 +3,7 @@
 > Todos los datos de ejemplo (facturas, emails y base de datos) son ficticios.
 
 ![CI](https://github.com/vautomatiza26-bit/dia1-apis-ia/actions/workflows/ci.yml/badge.svg)
+
 Proyectos prácticos de automatización con LLMs (Claude y GPT), construidos como parte de mi proceso de especialización en IA generativa y automatización.
 
 Vengo del mundo de la automatización con **n8n** (proyecto propio de especialización [JAPIOS IA](https://github.com/vautomatiza26-bit)) y este repositorio documenta el paso a construir estas soluciones también a nivel de código, entendiendo qué ocurre "por debajo" de las herramientas no-code.
