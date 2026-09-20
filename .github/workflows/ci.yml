@@ -7,8 +7,13 @@
 #
 # Qué comprueba:
 # - Que el código Python no tiene errores de sintaxis
-# - Que todas las dependencias listadas en requirements.txt se instalan sin conflictos
+# - Que todas las dependencias de requirements.txt (y requirements-dev.txt,
+#   que solo añade pytest) se instalan sin conflictos
 # - Que no hay archivos de credenciales colados por error en el commit
+# - Que los tests de pytest pasan. Van al final, después de las comprobaciones
+#   baratas, y son offline: tests/conftest.py usa una clave de API falsa y una
+#   base SQLite temporal, así que este job no necesita secretos ni variables
+#   de entorno. Los evals de pago NO se ejecutan aquí (ver eval-manual.yml).
 
 name: CI
 
@@ -32,7 +37,7 @@ jobs:
           python-version: "3.12"
 
       - name: Instalar dependencias
-        run: pip install -r requirements.txt
+        run: pip install -r requirements.txt -r requirements-dev.txt
 
       - name: Comprobar sintaxis de todos los scripts Python
         run: |
@@ -46,3 +51,6 @@ jobs:
           else
             echo "✅ No se han encontrado archivos de credenciales sueltos."
           fi
+
+      - name: Ejecutar los tests (offline, sin secretos)
+        run: python -m pytest -v
