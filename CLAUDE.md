@@ -6,6 +6,7 @@ Repo: https://github.com/vautomatiza26-bit/dia1-apis-ia · Demo: https://asisten
 ## Entorno y comandos
 - Windows + PowerShell (no bash). Python 3.14 con las dependencias instaladas globalmente (no hay entorno virtual).
 - Arrancar la API: `py -m uvicorn api:app --reload`
+- Tests: `py -m pytest -v` (offline y gratuitos)
 - Docker (build y run): `docker build -t asistente-facturas-api .` y `docker run -p 8000:8000 --env-file .env asistente-facturas-api`
 - Estructura: `api.py` + `index.html`, scripts `dia*`/`semana*`, `asistente_facturas.py`, `agente_bandeja_email.py`, `eval_extraccion_facturas.py`, `facturas/`, `emails/`, `Dockerfile`, `.github/workflows/`
 
