@@ -1,0 +1,3 @@
+# Dependencias solo de desarrollo (tests). Van aparte de requirements.txt
+# para que pytest no engorde la imagen Docker ni el despliegue en Render.
+pytest
