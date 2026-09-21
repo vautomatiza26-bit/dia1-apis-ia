@@ -61,7 +61,7 @@ Comparación entre llamadas bloqueantes y **streaming** de respuestas, midiendo 
 **CI/CD con GitHub Actions**: comprobaciones automáticas gratuitas en cada `push` (sintaxis, ausencia de credenciales filtradas), separadas de un workflow manual de evaluación que sí consume la API de pago — una decisión deliberada de coste, no accidental.
 
 ### `tests/` (pytest)
-**Tests automáticos de la validación SELECT-only** de `semana3_agente_sql.py`: comprueban que `DROP`, `DELETE`, `INSERT`, etc. se rechazan, que un `SELECT` válido funciona y que varias sentencias con `;` no modifican la base. Son **offline y gratuitos**: usan una base SQLite temporal, no leen `.env` y no llaman a ninguna API. Las dependencias de test van aparte en `requirements-dev.txt` para no engordar la imagen de producción.
+**Tests automáticos de la validación SELECT-only** de `semana3_agente_sql.py`: comprueban que `DROP`, `DELETE`, `INSERT`, etc. se rechazan, que un `SELECT` válido funciona y que varias sentencias con `;` se rechazan en el propio validador, sin depender de SQLite. Son **offline y gratuitos**: usan una base SQLite temporal, no leen `.env` y no llaman a ninguna API. Las dependencias de test van aparte en `requirements-dev.txt` para no engordar la imagen de producción.
 
 ```powershell
 py -m pip install -r requirements-dev.txt   # una sola vez

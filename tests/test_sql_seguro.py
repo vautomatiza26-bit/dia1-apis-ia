@@ -105,18 +105,23 @@ def test_acepta_punto_y_coma_final(modulo_sql, base_temporal):
     [
         "SELECT 1; DROP TABLE facturas",
         "SELECT 1; DELETE FROM facturas",
+        # Espacios y saltos de línea alrededor del segundo ";" (y ";" final).
+        "SELECT 1;   DROP TABLE facturas   ;",
+        "SELECT 1\n;\nDELETE FROM facturas\n;\n",
+        "SELECT 1 ;\n\t DELETE FROM facturas  \n ;  ",
+        # Solo se tolera UN ";" final: dos seguidos ya son varias sentencias.
+        "SELECT 1;;",
     ],
 )
-def test_varias_sentencias_no_modifican_la_base(modulo_sql, base_temporal, consulta):
-    # OJO, hueco conocido: estas consultas PASAN el guard (empiezan por SELECT).
-    # Lo que las frena es que sqlite3.execute() solo admite una sentencia por
-    # llamada y lanza ProgrammingError, que la función captura. Es decir, la base
-    # está protegida por SQLite y no por nuestra validación.
-    # Por eso el test comprueba el RESULTADO (nada cambia y hay error), no qué
-    # capa lo impidió. Al endurecer el guard, el mensaje pasará a MENSAJE_GUARD.
+def test_rechaza_varias_sentencias_en_el_validador(modulo_sql, base_temporal, consulta):
+    # El rechazo debe venir de NUESTRA validación, no de SQLite. Lo distinguimos
+    # por el mensaje: el guard responde "ERROR: por seguridad..." y un fallo de
+    # SQLite (p. ej. el ProgrammingError de execute() con varias sentencias)
+    # responde "ERROR al ejecutar...". Si el guard no las frena, este test falla
+    # aunque SQLite acabe protegiendo la base.
     resultado = modulo_sql.ejecutar_sql_seguro(consulta)
 
-    assert resultado.startswith(MENSAJE_SQLITE)
+    assert resultado.startswith(MENSAJE_GUARD)
     assert contar_filas(base_temporal) == 3
 
 
