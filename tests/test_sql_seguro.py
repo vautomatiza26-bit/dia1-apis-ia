@@ -12,6 +12,8 @@ la usen de verdad se comprueba en test_envoltorios_sql.py.
 Son tests offline y gratuitos: no llaman a ninguna API (ver conftest.py).
 """
 
+import shutil
+import sqlite3
 import subprocess
 import sys
 from pathlib import Path
@@ -22,6 +24,7 @@ from conftest import contar_filas
 
 MENSAJE_GUARD = "ERROR: por seguridad"
 MENSAJE_SQLITE = "ERROR al ejecutar"
+MENSAJE_ERROR_CONSULTA = "ERROR al ejecutar la consulta:"
 
 RAIZ_DEL_REPO = Path(__file__).resolve().parent.parent
 
@@ -170,3 +173,119 @@ def test_sql_invalido_devuelve_error_sin_lanzar_excepcion(modulo_sql_seguro, bas
         "SELECT * FROM tabla_que_no_existe", base_temporal
     )
     assert resultado.startswith(MENSAJE_SQLITE)
+
+
+# --- 5. Defensa extra: base en solo lectura y conexión siempre cerrada -----------
+#
+# Por qué: el guard de arriba es la primera barrera (vive en el código). Esta es la
+# segunda, a nivel de SQLite: aunque un día el guard tuviera un hueco, una conexión
+# abierta con mode=ro no puede escribir. Es defensa en profundidad: dos capas
+# independientes, para que un fallo de una no deje la base expuesta.
+
+@pytest.fixture
+def espia_conexiones(monkeypatch, modulo_sql_seguro):
+    """
+    Envuelve sqlite3.connect (solo mientras dura el test) para anotar CÓMO lo
+    llama ejecutar_sql_seguro y qué conexiones abre. Sigue abriendo la base de
+    verdad: solo observa.
+
+    Se espía en vez de abrir la conexión en el test a mano porque un test que
+    hiciera sqlite3.connect(..."?mode=ro") pasaría siempre, con o sin cambio en
+    la función: probaría SQLite, no nuestro código. Aquí se reabre la base con
+    los MISMOS argumentos que usó la función.
+    """
+    conectar_real = sqlite3.connect
+
+    class Espia:
+        def __init__(self):
+            self.llamadas = []
+            self.conexiones = []
+
+        def __call__(self, *args, **kwargs):
+            conexion = conectar_real(*args, **kwargs)
+            self.llamadas.append((args, kwargs))
+            self.conexiones.append(conexion)
+            return conexion
+
+        def abrir_como_la_funcion(self):
+            assert self.llamadas, "ejecutar_sql_seguro no llegó a abrir ninguna conexión"
+            args, kwargs = self.llamadas[0]
+            return conectar_real(*args, **kwargs)
+
+    espia = Espia()
+    monkeypatch.setattr(modulo_sql_seguro.sqlite3, "connect", espia)
+    return espia
+
+
+def test_la_conexion_se_abre_en_solo_lectura(modulo_sql_seguro, base_temporal, espia_conexiones):
+    resultado = modulo_sql_seguro.ejecutar_sql_seguro(
+        "SELECT COUNT(*) AS n FROM facturas", base_temporal
+    )
+    assert resultado == "[{'n': 3}]"  # el espía ha visto una consulta real
+
+    conexion = espia_conexiones.abrir_como_la_funcion()
+    try:
+        with pytest.raises(sqlite3.OperationalError, match="readonly"):
+            conexion.execute("INSERT INTO facturas (id, numero_factura) VALUES (99, 'X-999')")
+    finally:
+        conexion.close()
+
+    assert contar_filas(base_temporal) == 3
+
+
+def test_base_inexistente_devuelve_error_y_no_crea_el_archivo(modulo_sql_seguro, tmp_path):
+    # Con sqlite3.connect(ruta) a secas, una ruta mal escrita CREA una base vacía
+    # (y el error solo sale después, como "no such table"). En solo lectura no.
+    ruta = tmp_path / "no_existe.db"
+
+    resultado = modulo_sql_seguro.ejecutar_sql_seguro("SELECT COUNT(*) AS n FROM facturas", ruta)
+
+    assert resultado.startswith(MENSAJE_ERROR_CONSULTA)
+    assert not ruta.exists()
+
+
+def test_select_valido_funciona_con_ruta_con_espacios_y_como_texto(
+    modulo_sql_seguro, base_temporal, tmp_path
+):
+    # Al pasar la ruta como URI hay que codificarla (espacios, etc.). Se prueba con
+    # una carpeta con espacios y la ruta como str, no como Path.
+    carpeta = tmp_path / "carpeta con espacios"
+    carpeta.mkdir()
+    destino = carpeta / "mi base.db"
+    shutil.copy(base_temporal, destino)
+
+    resultado = modulo_sql_seguro.ejecutar_sql_seguro(
+        "SELECT COUNT(*) AS n FROM facturas", str(destino)
+    )
+
+    assert resultado == "[{'n': 3}]"
+
+
+def test_select_valido_funciona_con_ruta_relativa(
+    modulo_sql_seguro, base_temporal, monkeypatch
+):
+    # Un URI file: exige ruta absoluta; los scripts pasan rutas relativas
+    # ("facturas.db"), así que la función tiene que resolverla antes.
+    monkeypatch.chdir(base_temporal.parent)
+
+    resultado = modulo_sql_seguro.ejecutar_sql_seguro(
+        "SELECT COUNT(*) AS n FROM facturas", base_temporal.name
+    )
+
+    assert resultado == "[{'n': 3}]"
+
+
+@pytest.mark.parametrize(
+    "consulta",
+    [
+        "SELECT COUNT(*) AS n FROM facturas",  # camino feliz
+        "SELECT * FROM tabla_que_no_existe",  # la consulta falla a mitad de camino
+    ],
+)
+def test_la_conexion_se_cierra_siempre(modulo_sql_seguro, base_temporal, espia_conexiones, consulta):
+    modulo_sql_seguro.ejecutar_sql_seguro(consulta, base_temporal)
+
+    assert len(espia_conexiones.conexiones) == 1
+    # Una conexión cerrada lanza ProgrammingError al usarla; una abierta no.
+    with pytest.raises(sqlite3.ProgrammingError):
+        espia_conexiones.conexiones[0].execute("SELECT 1")

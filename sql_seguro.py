@@ -7,13 +7,15 @@ que es el endpoint público, se quedó sin el rechazo de varias sentencias).
 Una regla de seguridad duplicada acaba desincronizada; con una sola copia, un
 cambio o un test cubren a todos los que la usan.
 
-Es un módulo deliberadamente PEQUEÑO y SIN EFECTOS SECUNDARIOS: solo importa
-sqlite3, así que se puede importar desde cualquier sitio (y desde los tests)
+Es un módulo deliberadamente PEQUEÑO y SIN EFECTOS SECUNDARIOS: solo importa la
+biblioteca estándar, así que se puede importar desde cualquier sitio (y desde los tests)
 sin leer .env ni crear un cliente de la API. Por eso recibe la ruta de la base
 de datos como parámetro en vez de tener su propia constante: cada script sigue
 decidiendo qué base usa.
 """
 
+import contextlib
+import pathlib
 import sqlite3
 
 
@@ -41,11 +43,20 @@ def ejecutar_sql_seguro(consulta_sql: str, ruta_bd) -> str:
         return "ERROR: por seguridad, solo se permite una única sentencia SELECT (sin ';' intermedios)."
 
     try:
-        conexion = sqlite3.connect(ruta_bd)
-        conexion.row_factory = sqlite3.Row  # para poder leer resultados por nombre de columna
-        cursor = conexion.execute(consulta_sql)
-        filas = [dict(fila) for fila in cursor.fetchall()]
-        conexion.close()
+        # Segunda barrera, independiente del guard de arriba: la base se abre en
+        # SOLO LECTURA (mode=ro). Aunque un día el guard tuviera un hueco, SQLite
+        # rechazaría cualquier escritura. Además, si la ruta está mal, falla en
+        # vez de crear una base vacía. Un URI "file:" exige ruta absoluta y bien
+        # codificada (espacios...), de ahí .resolve().as_uri().
+        # Todo va DENTRO del try para que un fallo al abrir devuelva el mensaje
+        # de error y no una excepción. closing() cierra la conexión aunque la
+        # consulta falle (el "with conexion" de sqlite3 no cierra, solo gestiona
+        # transacciones).
+        uri = pathlib.Path(ruta_bd).resolve().as_uri() + "?mode=ro"
+        with contextlib.closing(sqlite3.connect(uri, uri=True)) as conexion:
+            conexion.row_factory = sqlite3.Row  # para poder leer resultados por nombre de columna
+            cursor = conexion.execute(consulta_sql)
+            filas = [dict(fila) for fila in cursor.fetchall()]
         return str(filas) if filas else "La consulta no devolvió resultados."
     except sqlite3.Error as error:
         return f"ERROR al ejecutar la consulta: {error}"
