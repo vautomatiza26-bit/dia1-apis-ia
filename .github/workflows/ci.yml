@@ -14,6 +14,9 @@
 #   baratas, y son offline: tests/conftest.py usa una clave de API falsa y una
 #   base SQLite temporal, así que este job no necesita secretos ni variables
 #   de entorno. Los evals de pago NO se ejecutan aquí (ver eval-manual.yml).
+# - Que no hay claves de API dentro del código ni en TODO el historial de git
+#   (job aparte "escaneo-secretos", con el binario oficial de gitleaks). Va en
+#   su propio job para tener permisos mínimos y no alargar el job de tests.
 
 name: CI
 
@@ -54,3 +57,43 @@ jobs:
 
       - name: Ejecutar los tests (offline, sin secretos)
         run: python -m pytest -v
+
+  escaneo-secretos:
+    runs-on: ubuntu-latest
+    # Permisos mínimos: solo leer el código. Van a nivel de ESTE job para no
+    # cambiar el comportamiento del job de arriba. No usa ningún secreto tuyo:
+    # el único token es el GITHUB_TOKEN automático, que solo usa el checkout.
+    permissions:
+      contents: read
+    env:
+      # Se ejecuta el binario oficial (licencia MIT) en vez de la action
+      # gitleaks-action: la action, en un push, solo escanea los commits de ese
+      # push, y aquí queremos revisar TODO el historial en cada ejecución.
+      GITLEAKS_VERSION: "8.30.1"
+      # SHA256 de gitleaks_8.30.1_linux_x64.tar.gz, copiado del
+      # gitleaks_8.30.1_checksums.txt de la release oficial. Si alguien altera
+      # el binario descargado, el checksum no coincide y el job falla.
+      GITLEAKS_SHA256: "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
+
+    steps:
+      - name: Descargar el código con TODO el historial
+        uses: actions/checkout@v4
+        with:
+          # Sin esto solo se bajaría el último commit y no habría historial
+          # que escanear.
+          fetch-depth: 0
+          # El token no se deja guardado en .git/config: este job solo lee.
+          persist-credentials: false
+
+      - name: Instalar gitleaks (binario oficial, verificado por checksum)
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/gitleaks.tar.gz" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/gitleaks.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP" gitleaks
+
+      - name: Buscar claves en el código y en todo el historial
+        # --redact: si encontrara algo, no imprime el valor en el log (público).
+        # Sale con código 1 si hay hallazgos, y eso hace fallar el job.
+        run: |
+          "$RUNNER_TEMP/gitleaks" git . --redact --verbose --no-banner
