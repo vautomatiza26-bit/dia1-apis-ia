@@ -20,6 +20,7 @@ import os
 import sqlite3
 from dotenv import load_dotenv
 import anthropic
+import sql_seguro
 
 load_dotenv()
 
@@ -42,34 +43,11 @@ Columnas:
 
 def ejecutar_sql_seguro(consulta_sql: str) -> str:
     """
-    Ejecuta una consulta SQL, pero SOLO si es de lectura (SELECT).
-    Esta comprobación es una primera barrera de seguridad básica.
+    Envoltorio fino: la validación (solo SELECT, una única sentencia) vive en
+    sql_seguro.py, compartida con api.py. Se mantiene aquí para que las llamadas
+    existentes no cambien y para que este script siga usando su propio BASE_DATOS.
     """
-    consulta_limpia = consulta_sql.strip().upper()
-    if not consulta_limpia.startswith("SELECT"):
-        return "ERROR: por seguridad, solo se permiten consultas SELECT (solo lectura)."
-
-    # Varias sentencias ("SELECT 1; DROP TABLE facturas"): empiezan por SELECT,
-    # así que el guard de arriba las dejaría pasar. Hoy las frena sqlite3.execute()
-    # (solo admite una sentencia por llamada), pero eso es una protección ajena a
-    # nuestro código que podría cambiar (otro driver, executescript...). La
-    # validación tiene que vivir aquí. Se tolera UN solo ";" final (los modelos lo
-    # escriben a menudo); si tras quitarlo aún queda algún ";", se rechaza.
-    # Limitación conocida: un ";" dentro de un texto entre comillas
-    # (WHERE nombre_cliente LIKE '%;%') también se rechaza. Es conservador a
-    # propósito: preferimos perder una consulta legítima rara a analizar SQL.
-    if ";" in consulta_sql.strip().removesuffix(";"):
-        return "ERROR: por seguridad, solo se permite una única sentencia SELECT (sin ';' intermedios)."
-
-    try:
-        conexion = sqlite3.connect(BASE_DATOS)
-        conexion.row_factory = sqlite3.Row  # para poder leer resultados por nombre de columna
-        cursor = conexion.execute(consulta_sql)
-        filas = [dict(fila) for fila in cursor.fetchall()]
-        conexion.close()
-        return str(filas) if filas else "La consulta no devolvió resultados."
-    except sqlite3.Error as error:
-        return f"ERROR al ejecutar la consulta: {error}"
+    return sql_seguro.ejecutar_sql_seguro(consulta_sql, BASE_DATOS)
 
 
 HERRAMIENTA_SQL = {

@@ -22,6 +22,7 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 import anthropic
+import sql_seguro
 
 load_dotenv()
 
@@ -54,17 +55,8 @@ HERRAMIENTA_SQL = {
 
 
 def ejecutar_sql_seguro(consulta_sql: str) -> str:
-    if not consulta_sql.strip().upper().startswith("SELECT"):
-        return "ERROR: por seguridad, solo se permiten consultas SELECT."
-    try:
-        conexion = sqlite3.connect(BASE_DATOS)
-        conexion.row_factory = sqlite3.Row
-        cursor = conexion.execute(consulta_sql)
-        filas = [dict(fila) for fila in cursor.fetchall()]
-        conexion.close()
-        return str(filas) if filas else "La consulta no devolvió resultados."
-    except sqlite3.Error as error:
-        return f"ERROR: {error}"
+    """Envoltorio fino: la validación vive en sql_seguro.py, compartida con semana3_agente_sql.py."""
+    return sql_seguro.ejecutar_sql_seguro(consulta_sql, BASE_DATOS)
 
 
 def preguntar_al_agente(pregunta: str) -> str:

@@ -2,11 +2,16 @@
 Fixtures compartidos para los tests.
 
 Objetivo: que los tests sean 100 % offline, gratuitos y sin tocar datos reales.
-Para eso hay que neutralizar tres cosas de semana3_agente_sql.py:
-  1. load_dotenv() al importar (leería el .env real).
-  2. anthropic.Anthropic(api_key=...) al importar (sin clave falla, y con clave
-     real tendría riesgo de gastar dinero si algún test llamara al modelo).
-  3. BASE_DATOS = "facturas.db" (la base real, que está versionada).
+
+Hay dos tipos de test y cada uno necesita cosas distintas:
+  - Los de sql_seguro.py (la validación de verdad) no necesitan neutralizar nada:
+    ese módulo no importa anthropic ni dotenv. Solo les hace falta una base
+    SQLite temporal, para que facturas.db (la real, versionada) nunca se abra.
+  - Los de los envoltorios (semana3_agente_sql.py y api.py) sí importan
+    anthropic y dotenv al cargarse, así que hay que neutralizar dos cosas:
+      1. load_dotenv() al importar (leería el .env real).
+      2. anthropic.Anthropic(api_key=...) al importar (sin clave falla, y con
+         clave real tendría riesgo de gastar dinero si algún test llamara al modelo).
 """
 
 import importlib
@@ -15,32 +20,46 @@ import sys
 
 import pytest
 
-NOMBRE_MODULO = "semana3_agente_sql"
+# Los dos archivos que llevan un envoltorio fino sobre sql_seguro.ejecutar_sql_seguro.
+NOMBRES_MODULOS_ENVOLTORIO = ["semana3_agente_sql", "api"]
 
 
 @pytest.fixture
-def modulo_sql(monkeypatch):
-    """Importa semana3_agente_sql sin leer .env y con una clave falsa."""
+def modulo_sql_seguro():
+    """
+    Importa sql_seguro. Es un import como cualquier otro, pero vive en un
+    fixture (y no arriba del todo en cada test) para que, si el módulo falta o
+    falla al importarse, se vea qué tests concretos se rompen en lugar de un
+    único error de colección que oculta cuántos casos hay.
+    """
+    return importlib.import_module("sql_seguro")
+
+
+@pytest.fixture(params=NOMBRES_MODULOS_ENVOLTORIO)
+def modulo_envoltorio(request, monkeypatch):
+    """Importa semana3_agente_sql y luego api (uno por ejecución) sin leer .env y con clave falsa."""
     import dotenv
 
-    # El módulo hace "from dotenv import load_dotenv": esa referencia se resuelve
+    # Los módulos hacen "from dotenv import load_dotenv": esa referencia se resuelve
     # en el momento del import, así que basta con sustituirla antes de importar.
     monkeypatch.setattr(dotenv, "load_dotenv", lambda *args, **kwargs: False)
     # El constructor de Anthropic solo exige que haya una clave; no hace red.
     monkeypatch.setenv("ANTHROPIC_API_KEY", "clave-falsa-solo-para-tests")
 
     # Import limpio en cada test, para que no arrastre estado de otro.
-    sys.modules.pop(NOMBRE_MODULO, None)
-    modulo = importlib.import_module(NOMBRE_MODULO)
+    nombre = request.param
+    sys.modules.pop(nombre, None)
+    modulo = importlib.import_module(nombre)
     yield modulo
-    sys.modules.pop(NOMBRE_MODULO, None)
+    sys.modules.pop(nombre, None)
 
 
 @pytest.fixture
-def base_temporal(modulo_sql, tmp_path, monkeypatch):
+def base_temporal(tmp_path):
     """
-    Crea una base SQLite temporal con la tabla 'facturas' (3 filas) y hace que
-    el módulo apunte a ella, de modo que facturas.db real nunca se abre.
+    Crea una base SQLite temporal con la tabla 'facturas' (3 filas) y devuelve
+    su ruta. Cada test decide cómo apuntar a ella: pasándola como ruta_bd a
+    sql_seguro, o con monkeypatch de BASE_DATOS en un envoltorio.
     """
     ruta = tmp_path / "facturas_test.db"
 
@@ -67,9 +86,6 @@ def base_temporal(modulo_sql, tmp_path, monkeypatch):
     )
     conexion.commit()
     conexion.close()
-
-    # La función lee BASE_DATOS en cada llamada, así que monkeypatch surte efecto.
-    monkeypatch.setattr(modulo_sql, "BASE_DATOS", str(ruta))
     return ruta
 
 
