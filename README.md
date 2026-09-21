@@ -36,6 +36,7 @@ Migra los datos de facturas de CSV a una base de datos **SQLite**, con esquema t
 ### `semana3_agente_sql.py`
 Agente **text-to-SQL**: el modelo escribe sus propias consultas SQL según la pregunta en lenguaje natural, en vez de depender de funciones fijas por tipo de pregunta. Incluye una capa de seguridad que bloquea cualquier consulta que no sea de solo lectura (`SELECT`).
 
+Módulo compartido con la validación de SQL (solo SELECT, una sola sentencia), usado por el agente y por la API
 ### `api.py` + `index.html`
 La lógica del agente expuesta como **API web con FastAPI**, con documentación interactiva automática (`/docs`) y una **interfaz de chat propia** servida en la raíz, desplegadas públicamente en Render.
 
