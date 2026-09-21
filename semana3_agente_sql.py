@@ -17,7 +17,6 @@ medida básica de protección - en producción se añadirían más capas
 """
 
 import os
-import sqlite3
 from dotenv import load_dotenv
 import anthropic
 import sql_seguro

@@ -16,7 +16,6 @@ Ahí verás una interfaz automática para probar la API sin escribir código.
 """
 
 import os
-import sqlite3
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
