@@ -10,6 +10,19 @@ Portfolio técnico de automatización con LLMs: documenta la construcción incre
 - Evaluación sistemática de alucinaciones del modelo (`eval_extraccion_facturas.py`).
 - Escaneo de secretos en todo el historial de git (gitleaks) en cada push.
 
+## Stack
+
+- Python
+- Anthropic API (Claude) / OpenAI API (GPT), incluyendo su API de embeddings
+- Tool/function calling para salidas estructuradas y para agentes multi-herramienta
+- RAG con embeddings, tanto manual (NumPy) como con base de datos vectorial (ChromaDB)
+- SQL (SQLite) y patrón text-to-SQL, con validación de seguridad en las consultas generadas por IA
+- OAuth 2.0 (integración real con la API de Gmail)
+- FastAPI + despliegue en Render, con interfaz de chat web propia
+- Evaluación sistemática de resultados de IA (evals) y streaming de respuestas
+- Docker (containerización) y CI/CD con GitHub Actions
+- Manejo de variables de entorno (`python-dotenv`) para no exponer claves
+
 > Todos los datos de ejemplo (facturas, emails y base de datos) son ficticios. Los archivos generados que aparecen en el repo (`facturas.db`, `facturas_procesadas.csv`, `emails_procesados.csv`) están creados por IA para las demos y los tests, no son datos reales.
 
 ![CI](https://github.com/vautomatiza26-bit/dia1-apis-ia/actions/workflows/ci.yml/badge.svg) — CI en cada commit: sintaxis, 39 tests y escaneo de secretos con gitleaks.
@@ -80,19 +93,6 @@ Comparación entre llamadas bloqueantes y **streaming** de respuestas, midiendo 
 py -m pip install -r requirements-dev.txt   # una sola vez
 py -m pytest -v
 ```
-
-## Stack
-
-- Python
-- Anthropic API (Claude) / OpenAI API (GPT), incluyendo su API de embeddings
-- Tool/function calling para salidas estructuradas y para agentes multi-herramienta
-- RAG con embeddings, tanto manual (NumPy) como con base de datos vectorial (ChromaDB)
-- SQL (SQLite) y patrón text-to-SQL, con validación de seguridad en las consultas generadas por IA
-- OAuth 2.0 (integración real con la API de Gmail)
-- FastAPI + despliegue en Render, con interfaz de chat web propia
-- Evaluación sistemática de resultados de IA (evals) y streaming de respuestas
-- Docker (containerización) y CI/CD con GitHub Actions
-- Manejo de variables de entorno (`python-dotenv`) para no exponer claves
 
 ## Por qué este enfoque
 
