@@ -1,8 +1,18 @@
 # Camino hacia AI Engineer
 
-> Todos los datos de ejemplo (facturas, emails y base de datos) son ficticios.
+Portfolio técnico de automatización con LLMs: documenta la construcción incremental de un agente de IA (RAG + text-to-SQL) sobre dos dominios distintos (facturas y email), desde la primera llamada a un LLM hasta un sistema desplegado en producción, con tests automáticos, CI/CD y evaluación sistemática de resultados.
 
-![CI](https://github.com/vautomatiza26-bit/dia1-apis-ia/actions/workflows/ci.yml/badge.svg)
+## Lo más destacado
+
+- Agente en producción: FastAPI + Docker, desplegado en Render.
+- 39 tests automáticos (offline y gratuitos) ejecutados en CI en cada push.
+- Integración real con Gmail vía OAuth 2.0 (no simulada).
+- Evaluación sistemática de alucinaciones del modelo (`eval_extraccion_facturas.py`).
+- Escaneo de secretos en todo el historial de git (gitleaks) en cada push.
+
+> Todos los datos de ejemplo (facturas, emails y base de datos) son ficticios. Los archivos generados que aparecen en el repo (`facturas.db`, `facturas_procesadas.csv`, `emails_procesados.csv`) están creados por IA para las demos y los tests, no son datos reales.
+
+![CI](https://github.com/vautomatiza26-bit/dia1-apis-ia/actions/workflows/ci.yml/badge.svg) — CI en cada commit: sintaxis, 39 tests y escaneo de secretos con gitleaks.
 
 Proyectos prácticos de automatización con LLMs (Claude y GPT), construidos como parte de mi proceso de especialización en IA generativa y automatización.
 
